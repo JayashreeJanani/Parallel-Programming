@@ -28,6 +28,10 @@ int main(int argc, char **argv){
     }
 
     }
+    //2. Step 1A: Extracting argument values of argv, and converting them to integer
+    int N = atoi(argv[1]);
+    int mode = atoi(argv[2]);
+    printf("N = %d and mode = %d\n",N,mode);
     
     return 0;
 }
