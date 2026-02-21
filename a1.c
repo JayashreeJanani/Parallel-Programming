@@ -9,4 +9,25 @@
  3. Initialize A and B 
  4. Run the selected mode
  */
-//
+//TODO1: Step 0: Clean file structure
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+int main(int argc, char **argv){
+    printf("\n The number of arguments in argc = %d",argc);
+    //1. the condition below checks whether this argc has < 3 values 
+    //meaning size of matrix and number of threads are nnot giverm
+    if (argc < 3) {
+    printf("\n Usage: ./a1 N mode\n");
+    return 1;
+}
+    printf("\n Size of argv= %d",sizeof(argv));
+    if(argc==3){
+        for(int i = 0;i<sizeof(argv);i++){
+        printf("%d\n",argv[i]);
+    }
+
+    }
+    
+    return 0;
+}
