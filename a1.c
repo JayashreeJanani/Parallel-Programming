@@ -14,7 +14,7 @@
  Step 1: Parse N, mode and allocate A,B, C memory space==============100%
  Step 2: Initialization of matrices==================================100%
  Step 3: Mode 0(Serial Baseline)=====================================100%
- Step 4: Mode 1(threads + scheduling)
+ Step 4: Mode 1(threads + scheduling)================================100%
  Step 5: Mode 2(Collapse(2))
  Step 6: Mode 3(sync comparison: atomic vs critical)
  Step 7: Mode 4(tasks)
@@ -76,18 +76,39 @@ int main(int argc, char **argv){
     //7. Step 3B:Adding Kernel timing
     double kernel_start_time = omp_get_wtime();
     
-    //6. Step 3A: multiplication loop for mode 0
-    if (mode == 0){
-        for(int i =0; i<N; i++){
-            for(int j =0; j<N; j++){
-                double sum = 0.0;
-                for(int k =0;k<N;k++)
-                sum += A[i*N+k] *B[k*N+j];
-                C[i*N+j] = sum;
+    switch (mode){
+        case 0:
+        //6. Step 3A: multiplication loop for mode 0
+            for(int i =0; i<N; i++){
+                for(int j =0; j<N; j++){
+                    double sum = 0.0;
+                    for(int k =0;k<N;k++)
+                    sum += A[i*N+k] *B[k*N+j];
+                    C[i*N+j] = sum;
 
+                }
             }
-        }
+        break;
+        case 1:
+        //10. Step 4: Parallel scheduling
+        #pragma omp parallel for schedule(static)
+        for(int i =0; i<N; i++){
+                for(int j =0; j<N; j++){
+                    double sum = 0.0;
+                    for(int k =0;k<N;k++)
+                    sum += A[i*N+k] *B[k*N+j];
+                    C[i*N+j] = sum;
+
+                }
+            }
+        break;
+        case 2:
+        //collapse(2)
+        break;
+
+
     }
+
     //7.1: Step 3B: Adding Kernel Timing --> end time
    double kernel_end_time = omp_get_wtime();
    double total_kernel_time = kernel_end_time - kernel_start_time;
@@ -101,7 +122,7 @@ int main(int argc, char **argv){
     double sumC=0.0;
     double maxC = C[0];
     long long checksum = 0;
-    for (int idx = 0; idx<N*N-1;idx++){
+    for (int idx = 0; idx<N*N;idx++){
         sumC +=C[idx];
         if(C[idx]>maxC){
             maxC = C[idx];
@@ -113,5 +134,8 @@ int main(int argc, char **argv){
     double total_time = total_end - total_start;
     printf("Kernel Time = %f\n", total_kernel_time);
     printf("Total Time = %f\n",total_time);
+    printf("MaxC = %f\n",maxC);
+    printf("sumC = %f\n",sumC);
+
     return 0;
 }
