@@ -21,10 +21,10 @@ int main(int argc, char **argv){
     printf("\n Usage: ./a1 N mode\n");
     return 1;
 }
-    printf("\n Size of argv= %d",sizeof(argv));
+    
     if(argc==3){
-        for(int i = 0;i<sizeof(argv);i++){
-        printf("%d\n",argv[i]);
+        for(int i = 0;i<argc;i++){
+        printf("%s\n",argv[i]);
     }
 
     }
