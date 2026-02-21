@@ -8,12 +8,12 @@
  2. Allocate A,B,C (dynamic 1D arrays)
  3. Initialize A and B 
  4. Run the selected mode
- =====================================================================
+ ========================================================================
  Steps to be completed
  Step 0: Understanding inputs/ outputs===============================100%
  Step 1: Parse N, mode and allocate A,B, C memory space==============100%
  Step 2: Initialization of matrices==================================100%
- Step 3: Mode 0(Serial Baseline)
+ Step 3: Mode 0(Serial Baseline)=====================================100%
  Step 4: Mode 1(threads + scheduling)
  Step 5: Mode 2(Collapse(2))
  Step 6: Mode 3(sync comparison: atomic vs critical)
@@ -64,6 +64,8 @@ int main(int argc, char **argv){
     double *A = alloc_matrix(N);
     double *B = alloc_matrix(N);
     double *C = alloc_matrix(N);
+    //total start time
+   double total_start = omp_get_wtime();
     //5. Step 2: initialize A, B, C
     for(int i =0; i<N;i++){
         for(int j =0; j<N; j++){
@@ -71,8 +73,45 @@ int main(int argc, char **argv){
             B[i*N+j]= 1.0;
             C[i*N+j]= 0.0;        }
     }
+    //7. Step 3B:Adding Kernel timing
+    double kernel_start_time = omp_get_wtime();
     
+    //6. Step 3A: multiplication loop for mode 0
+    if (mode == 0){
+        for(int i =0; i<N; i++){
+            for(int j =0; j<N; j++){
+                double sum = 0.0;
+                for(int k =0;k<N;k++)
+                sum += A[i*N+k] *B[k*N+j];
+                C[i*N+j] = sum;
+
+            }
+        }
+    }
+    //7.1: Step 3B: Adding Kernel Timing --> end time
+   double kernel_end_time = omp_get_wtime();
+   double total_kernel_time = kernel_end_time - kernel_start_time;
+   printf("Kernel Start Time = %f\n",kernel_start_time);
+   printf("Kernel End Time = %f\n",kernel_end_time);
+    
+    //8. Step 3C: Sanity Checks
     printf("c[0] =%f\n",C[0]);
-    printf("c[N-1] =%f\n", C[N-1]);
+    printf("c[N-1] =%f\n", C[N]);
+    //9. Step 3D: Compute Analytics(serial)
+    double sumC=0.0;
+    double maxC = C[0];
+    long long checksum = 0;
+    for (int idx = 0; idx<N*N-1;idx++){
+        sumC +=C[idx];
+        if(C[idx]>maxC){
+            maxC = C[idx];
+        }
+        checksum += (long long)(C[idx] * 1000.0) * 100000;
+
+    }
+    double total_end = omp_get_wtime();
+    double total_time = total_end - total_start;
+    printf("Kernel Time = %f\n", total_kernel_time);
+    printf("Total Time = %f\n",total_time);
     return 0;
 }
