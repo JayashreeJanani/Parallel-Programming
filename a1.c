@@ -64,6 +64,15 @@ int main(int argc, char **argv){
     double *A = alloc_matrix(N);
     double *B = alloc_matrix(N);
     double *C = alloc_matrix(N);
+    //5. Step 2: initialize A, B, C
+    for(int i =0; i<N;i++){
+        for(int j =0; j<N; j++){
+            A[i*N+j]= 1.0;
+            B[i*N+j]= 1.0;
+            C[i*N+j]= 0.0;        }
+    }
     
+    printf("c[0] =%f\n",C[0]);
+    printf("c[N-1] =%f\n", C[N-1]);
     return 0;
 }
