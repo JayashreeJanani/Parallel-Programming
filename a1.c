@@ -16,8 +16,8 @@
  Step 3: Mode 0(Serial Baseline)=====================================100%
  Step 4: Mode 1(threads + scheduling)================================100%
  Step 5: Mode 2(Collapse(2))=========================================100%
- Step 6: Mode 3(sync comparison: atomic vs critical)
- Step 7: Mode 4(tasks)
+ Step 6: Mode 3(sync comparison: atomic vs critical)=================100%
+ Step 7: Mode 4(tasks)===============================================100%
  Step 8: SIMD modes 
  Step 9: Performance experiments
 
@@ -132,7 +132,7 @@ int main(int argc, char **argv){
         }
         break;
         case 4:
-        //critical check sum
+        //13. critical check sum
         #pragma omp parallel for schedule(static)
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
@@ -144,6 +144,39 @@ int main(int argc, char **argv){
             }
         }
         break;
+        case 5:{
+        //14. Step 7. Tasks
+        int block_size = 16;
+        #pragma omp parallel
+        {
+            
+            #pragma omp single
+            {
+                
+                    
+                    for(int i = 0; i<N; i +=block_size ){
+                        int i_start = i;
+                        int i_end = (i+block_size<N) ? (i+block_size):N;
+                        #pragma omp task firstprivate(i_start,i_end)
+                        {
+                            for(int ii =i_start; ii<i_end; ii++){
+                                for(int j =0; j<N; j++){
+                                    double sum = 0.0;
+                                    for(int k =0;k<N;k++)
+                                        sum += A[ii*N+k] *B[k*N+j];
+                                    C[ii*N+j] = sum;
+
+                                }
+                            }
+                       
+                    }
+                
+                }
+                #pragma omp taskwait
+            }
+        }
+    }
+            break;
 
     }
 
