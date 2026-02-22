@@ -79,7 +79,7 @@ int main(int argc, char **argv){
     double kernel_start_time = omp_get_wtime();
     
     switch (mode){
-        case 0:
+        case 0:{
         //6. Step 3A: multiplication loop for mode 0
             for(int i =0; i<N; i++){
                 for(int j =0; j<N; j++){
@@ -90,8 +90,9 @@ int main(int argc, char **argv){
 
                 }
             }
+        }
         break;
-        case 1:
+        case 1:{
         //10. Step 4: Parallel scheduling
         #pragma omp parallel for schedule(static)
         for(int i =0; i<N; i++){
@@ -103,8 +104,9 @@ int main(int argc, char **argv){
 
                 }
             }
+        }
         break;
-        case 2:
+        case 2:{
         //11. Step 5: Mode2: collapse(2)
         #pragma omp parallel for collapse(2) schedule(static)
         for(int i =0; i<N; i++){
@@ -116,9 +118,10 @@ int main(int argc, char **argv){
 
                 }
             }
+        }
         break;
         //12. Step 6: Mode3A:atomic
-        case 3:
+        case 3:{
         
             #pragma omp parallel for schedule(static)
         for (int i = 0; i < N; i++) {
@@ -131,7 +134,8 @@ int main(int argc, char **argv){
             }
         }
         break;
-        case 4:
+    }
+        case 4:{
         //13. critical check sum
         #pragma omp parallel for schedule(static)
         for (int i = 0; i < N; i++) {
@@ -143,6 +147,7 @@ int main(int argc, char **argv){
                 C[i*N + j] = sum;
             }
         }
+    }
         break;
         case 5:{
         //14. Step 7. Tasks
@@ -177,6 +182,24 @@ int main(int argc, char **argv){
         }
     }
             break;
+        case 6:{
+            //15. Step 8 SIMD
+            #pragma omp parallel for schedule(static)
+             for(int i =0; i<N; i++){
+                for(int j =0; j<N; j++){
+                    double sum = 0.0;
+                    #pragma omp simd reduction(+:sum)
+                    
+                    for(int k =0;k<N;k++)
+                    sum += A[i*N+k] *B[k*N+j];
+                    C[i*N+j] = sum;
+
+                
+            }
+            }
+
+        }
+        break;
 
     }
 
