@@ -117,7 +117,33 @@ int main(int argc, char **argv){
                 }
             }
         break;
-
+        //12. Step 6: Mode3A:atomic
+        case 3:
+        
+            #pragma omp parallel for schedule(static)
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                double sum = 0.0;
+                for (int k = 0; k < N; k++) {
+                    sum += A[i*N + k] * B[k*N + j];
+                }
+                C[i*N + j] = sum;
+            }
+        }
+        break;
+        case 4:
+        //critical check sum
+        #pragma omp parallel for schedule(static)
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                double sum = 0.0;
+                for (int k = 0; k < N; k++) {
+                    sum += A[i*N + k] * B[k*N + j];
+                }
+                C[i*N + j] = sum;
+            }
+        }
+        break;
 
     }
 
@@ -131,23 +157,61 @@ int main(int argc, char **argv){
     printf("c[0] =%f\n",C[0]);
     printf("c[last] =%f\n", C[N*N-1]);
     //9. Step 3D: Compute Analytics(serial)
-    double sumC=0.0;
-    double maxC = C[0];
-    long long checksum = 0;
-    for (int idx = 0; idx<N*N;idx++){
-        sumC +=C[idx];
-        if(C[idx]>maxC){
-            maxC = C[idx];
-        }
-        checksum += (long long)(C[idx] * 1000.0) % 100000;
+   
+double sumC = 0.0;
+double maxC = C[0];
 
+for (int idx = 0; idx < N*N; idx++) {
+    double x = C[idx];
+    sumC += x;
+    if (x > maxC) maxC = x;
+}
+
+// Analytics: checksum (mode-dependent)
+
+long long checksum = 0;
+double t_ck_start = omp_get_wtime();
+
+if (mode == 3) {
+    // Mode 3: checksum using atomic
+    #pragma omp parallel for
+    for (int idx = 0; idx < N*N; idx++) {
+        long long contrib = (long long)(C[idx] * 1000.0) % 100000;
+        #pragma omp atomic
+        checksum += contrib;
     }
-    double total_end = omp_get_wtime();
-    double total_time = total_end - total_start;
-    printf("Kernel Time = %f\n", total_kernel_time);
-    printf("Total Time = %f\n",total_time);
-    printf("MaxC = %f\n",maxC);
-    printf("sumC = %f\n",sumC);
+}
+else if (mode == 4) {
+    // Mode 4: checksum using critical
+    #pragma omp parallel for
+    for (int idx = 0; idx < N*N; idx++) {
+        long long contrib = (long long)(C[idx] * 1000.0) % 100000;
+        #pragma omp critical
+        {
+            checksum += contrib;
+        }
+    }
+}
+else {
+    // Modes 0/1/2: checksum serial (baseline)
+    for (int idx = 0; idx < N*N; idx++) {
+        checksum += (long long)(C[idx] * 1000.0) % 100000;
+    }
+}
+
+double t_ck_end = omp_get_wtime();
+double checksum_time = t_ck_end - t_ck_start;
+
+
+double total_end = omp_get_wtime();
+double total_time = total_end - total_start;
+
+printf("Kernel Time = %f\n", total_kernel_time);
+printf("Total Time = %f\n", total_time);
+printf("MaxC = %f\n", maxC);
+printf("sumC = %f\n", sumC);
+printf("checksum = %lld\n", checksum);
+printf("checksum_time = %f\n", checksum_time);
 
     return 0;
 }
