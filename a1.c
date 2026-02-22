@@ -15,7 +15,7 @@
  Step 2: Initialization of matrices==================================100%
  Step 3: Mode 0(Serial Baseline)=====================================100%
  Step 4: Mode 1(threads + scheduling)================================100%
- Step 5: Mode 2(Collapse(2))
+ Step 5: Mode 2(Collapse(2))=========================================100%
  Step 6: Mode 3(sync comparison: atomic vs critical)
  Step 7: Mode 4(tasks)
  Step 8: SIMD modes 
@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <math.h>
 //4.1. Step 1C--> allocation of memory spaces of matrix A, B, C
 static double* alloc_matrix(int N) {
     double *m = (double*)malloc((size_t)N * (size_t)N * sizeof(double));
@@ -69,9 +70,10 @@ int main(int argc, char **argv){
     //5. Step 2: initialize A, B, C
     for(int i =0; i<N;i++){
         for(int j =0; j<N; j++){
-            A[i*N+j]= 1.0;
-            B[i*N+j]= 1.0;
-            C[i*N+j]= 0.0;        }
+            A[i*N + j] = sin((double)i) * cos((double)j) + sqrt((double)(i + j + 1));
+            B[i*N + j] = cos((double)i) * sin((double)j) + sqrt((double)(i + j + 2));
+            C[i*N+j]= 0.0;        
+        }
     }
     //7. Step 3B:Adding Kernel timing
     double kernel_start_time = omp_get_wtime();
@@ -103,7 +105,17 @@ int main(int argc, char **argv){
             }
         break;
         case 2:
-        //collapse(2)
+        //11. Step 5: Mode2: collapse(2)
+        #pragma omp parallel for collapse(2) schedule(static)
+        for(int i =0; i<N; i++){
+                for(int j =0; j<N; j++){
+                    double sum = 0.0;
+                    for(int k =0;k<N;k++)
+                    sum += A[i*N+k] *B[k*N+j];
+                    C[i*N+j] = sum;
+
+                }
+            }
         break;
 
 
@@ -117,7 +129,7 @@ int main(int argc, char **argv){
     
     //8. Step 3C: Sanity Checks
     printf("c[0] =%f\n",C[0]);
-    printf("c[N-1] =%f\n", C[N]);
+    printf("c[last] =%f\n", C[N*N-1]);
     //9. Step 3D: Compute Analytics(serial)
     double sumC=0.0;
     double maxC = C[0];
@@ -127,7 +139,7 @@ int main(int argc, char **argv){
         if(C[idx]>maxC){
             maxC = C[idx];
         }
-        checksum += (long long)(C[idx] * 1000.0) * 100000;
+        checksum += (long long)(C[idx] * 1000.0) % 100000;
 
     }
     double total_end = omp_get_wtime();
