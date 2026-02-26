@@ -38,7 +38,7 @@ static double* alloc_matrix(int N) {
     return m;
 }
 int main(int argc, char **argv){
-    printf("\n The number of arguments in argc = %d",argc);
+    // printf("\n The number of arguments in argc = %d",argc);
     //1. the condition below checks whether this argc has < 3 values 
     //meaning size of matrix and number of threads are nnot giverm
     if (argc < 3) {
@@ -46,12 +46,12 @@ int main(int argc, char **argv){
     return 1;
 }
     
-    if(argc==3){
-        for(int i = 0;i<argc;i++){
-        printf("%s\n",argv[i]);
-    }
+    // if(argc==3){
+    //     for(int i = 0;i<argc;i++){
+    //     printf("%s\n",argv[i]);
+    // }
 
-    }
+    // }
     //2. Step 1A: Extracting argument values of argv, and converting them to integer
     int N = atoi(argv[1]);
     int mode = atoi(argv[2]);
@@ -206,8 +206,8 @@ int main(int argc, char **argv){
     //7.1: Step 3B: Adding Kernel Timing --> end time
    double kernel_end_time = omp_get_wtime();
    double total_kernel_time = kernel_end_time - kernel_start_time;
-   printf("Kernel Start Time = %f\n",kernel_start_time);
-   printf("Kernel End Time = %f\n",kernel_end_time);
+//    printf("Kernel Start Time = %f\n",kernel_start_time);
+//    printf("Kernel End Time = %f\n",kernel_end_time);
     
     //8. Step 3C: Sanity Checks
     printf("c[0] =%f\n",C[0]);
@@ -263,11 +263,11 @@ double total_end = omp_get_wtime();
 double total_time = total_end - total_start;
 
 printf("Kernel Time = %f\n", total_kernel_time);
-printf("Total Time = %f\n", total_time);
+// printf("Total Time = %f\n", total_time);
 printf("MaxC = %f\n", maxC);
 printf("sumC = %f\n", sumC);
 printf("checksum = %lld\n", checksum);
-printf("checksum_time = %f\n", checksum_time);
+// printf("checksum_time = %f\n", checksum_time);
 
     return 0;
 }
