@@ -1,27 +1,4 @@
-/*
-"The Program that we are going to execute is one executable."
- ./a1 N mode
- N = size of the matrix (NXN)
- mode = which implementation to run(serial, parallel-for, collapse, atomic/critical checksum, task, simd, etc.)
- Four big parts:
- 1. Read inputs: (n,mode)
- 2. Allocate A,B,C (dynamic 1D arrays)
- 3. Initialize A and B 
- 4. Run the selected mode
- ========================================================================
- Steps to be completed
- Step 0: Understanding inputs/ outputs===============================100%
- Step 1: Parse N, mode and allocate A,B, C memory space==============100%
- Step 2: Initialization of matrices==================================100%
- Step 3: Mode 0(Serial Baseline)=====================================100%
- Step 4: Mode 1(threads + scheduling)================================100%
- Step 5: Mode 2(Collapse(2))=========================================100%
- Step 6: Mode 3(sync comparison: atomic vs critical)=================100%
- Step 7: Mode 4(tasks)===============================================100%
- Step 8: SIMD modes 
- Step 9: Performance experiments
 
- */
 //TODO1: Step 0: Clean file structure
 #include <stdio.h>
 #include <stdlib.h>
